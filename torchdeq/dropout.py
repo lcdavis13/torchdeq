@@ -99,7 +99,7 @@ class VariationalDropout(_VariationalDropoutNd):
         super().__init__(dropout)
 
     def reset_mask(self, x):
-        m = torch.zeros(*x.shape).bernoulli_(1 - self.dropout)
+        m = torch.zeros(*x.shape, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
@@ -136,11 +136,11 @@ class VariationalDropout1d(_VariationalDropoutNd):
         if self.token_first:
             # Dimension (B, L, D)
             B, _, D = x.shape
-            m = torch.zeros(B, 1, D).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, 1, D, device=x.device).bernoulli_(1 - self.dropout)
         else:
             # Dimension (B, D, L)
             B, D, _ = x.shape
-            m = torch.zeros(B, D, 1).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, D, 1, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
@@ -176,11 +176,11 @@ class VariationalDropout2d(_VariationalDropoutNd):
         if self.token_first:
             # Dimension (B, H, W, D)
             B, _, _, D = x.shape
-            m = torch.zeros(B, 1, 1, D).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, 1, 1, D, device=x.device).bernoulli_(1 - self.dropout)
         else:
             # Dimension (B, D, H, W)
             B, D, _, _ = x.shape
-            m = torch.zeros(B, D, 1, 1).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, D, 1, 1, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
@@ -216,11 +216,11 @@ class VariationalDropout3d(_VariationalDropoutNd):
         if self.token_first:
             # Dimension (B, T, H, W, D)
             B, _, _, _, D = x.shape
-            m = torch.zeros(B, 1, 1, 1, D).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, 1, 1, 1, D, device=x.device).bernoulli_(1 - self.dropout)
         else:
             # Dimension (B, D, T, H, W)
             B, D, _, _, _ = x.shape
-            m = torch.zeros(B, D, 1, 1, 1).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, D, 1, 1, 1, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
@@ -256,11 +256,11 @@ class VariationalDropToken1d(_VariationalDropoutNd):
         if self.token_first:
             # Dimension (B, L, D)
             B, L, _ = x.shape
-            m = torch.zeros(B, L, 1).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, L, 1, device=x.device).bernoulli_(1 - self.dropout)
         else:
             # Dimension (B, D, L)
             B, _, L = x.shape
-            m = torch.zeros(B, 1, L).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, 1, L, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
@@ -296,11 +296,11 @@ class VariationalDropToken2d(_VariationalDropoutNd):
         if self.token_first:
             # Dimension (B, H, W, D)
             B, H, W, _ = x.shape
-            m = torch.zeros(B, H, W, 1).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, H, W, 1, device=x.device).bernoulli_(1 - self.dropout)
         else:
             # Dimension (B, D, H, W)
             B, _, H, W = x.shape
-            m = torch.zeros(B, 1, H, W).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, 1, H, W, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
@@ -336,11 +336,11 @@ class VariationalDropToken3d(_VariationalDropoutNd):
         if self.token_first:
             # Dimension (B, T, H, W, D)
             B, T, H, W, _ = x.shape
-            m = torch.zeros(B, T, H, W, 1).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, T, H, W, 1, device=x.device).bernoulli_(1 - self.dropout)
         else:
             # Dimension (B, D, T, H, W)
             B, _, T, H, W = x.shape
-            m = torch.zeros(B, 1, T, H, W).bernoulli_(1 - self.dropout)
+            m = torch.zeros(B, 1, T, H, W, device=x.device).bernoulli_(1 - self.dropout)
         mask = m.requires_grad_(False) / (1 - self.dropout)
         self.mask = mask
 
