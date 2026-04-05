@@ -152,7 +152,7 @@ class Attention(nn.Module):
         rlen = pos_emb.shape[2]
         
         if mems is None: 
-            mems = torch.tensor([]).view(0, 0, 0)
+            mems = torch.tensor([]).view(0, 0, 0).to(z.device)
         mlen = mems.shape[2]
         cat = torch.cat([mems, z], dim=-1)
 
@@ -188,8 +188,8 @@ class Attention(nn.Module):
         # Compute attention probability
         # We apply a local mask, with local horizon size of mlen
         local_size = self.local_size or 1000
-        attn_mask = (torch.triu(torch.ones(qlen, klen), diagonal=1+mlen) > 0)[None]
-        attn_mask += (torch.tril(torch.ones(qlen, klen), diagonal=mlen-local_size) > 0)[None]
+        attn_mask = (torch.triu(torch.ones(qlen, klen, device=z.device), diagonal=1+mlen) > 0)[None]
+        attn_mask += (torch.tril(torch.ones(qlen, klen, device=z.device), diagonal=mlen-local_size) > 0)[None]
         if attn_mask is not None and attn_mask.any().item():
             attn_score = attn_score.float().masked_fill(
                     attn_mask[None], -float('inf')).type_as(attn_score)
@@ -290,8 +290,11 @@ class DEQTransformerLM(nn.Module):
                     self.crit.out_projs[i].weight.data = self.word_emb.emb_projs[i].weight.data
 
     @torch.no_grad()
-    def init_mems(self):
-        mems = [torch.empty(0), torch.empty(0)]
+    def init_mems(self, device=None):
+        if device is None:
+            mems = [torch.empty(0), torch.empty(0)]
+        else:
+            mems = [torch.empty(0, device=device), torch.empty(0, device=device)]
         return mems       # For z_hist and u_hist
     
     @torch.no_grad()
@@ -339,11 +342,11 @@ class DEQTransformerLM(nn.Module):
         if z_hist is not None and z_hist.nelement() > 0:
             assert z_hist.shape[2] == u_hist.shape[2], "Padding fixed points and padding embedding dimensions don't agree"
         else:
-            z_hist, u_hist = torch.zeros(bsz, d_model, 0), torch.zeros(bsz, 3*d_model, 0)
+            z_hist, u_hist = torch.zeros(bsz, d_model, 0, device=data.device), torch.zeros(bsz, 3*d_model, 0, device=data.device)
         mlen = z_hist.shape[2]
         klen = mlen + qlen    # qlen is seq_len, mlen is pad_len
 
-        pos_seq = torch.arange(klen-1, -1, -1.0)
+        pos_seq = torch.arange(klen-1, -1, -1.0, device=data.device)
         pos_emb = self.pos_drop(self.pos_emb(pos_seq))                  # bsz x d_model x (qlen + mlen) for positional embedding
         u_cat = torch.cat([u_hist, u_now], dim=2)
 
